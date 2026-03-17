@@ -1,3 +1,13 @@
+//
+//  FloatingAddButton.swift
+//  TradingDiary
+//
+//  Created by dnkdo on 3/16/26.
+//
+
+import SwiftUI
+
+
 struct FloatingAddButton: View {
 
     var action: () -> Void
