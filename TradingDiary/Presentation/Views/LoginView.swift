@@ -160,13 +160,13 @@ struct LoginView: View {
 }
 
 #Preview {
-//    let container = AppContainer()
-//    return LoginView()
-//        .environmentObject(
-//            AuthViewModel(
-//                loginUseCase: container.loginUseCase,
-//                logoutUseCase: container.logoutUseCase,
-//                getAuthState: container.getAuthStateUseCase
-//            )
-//        )
+    let container = AppContainer()
+    return LoginView()
+        .environmentObject(
+            AuthViewModel(
+                loginUseCase: container.loginUseCase,
+                logoutUseCase: container.logoutUseCase,
+                getAuthState: container.getAuthStateUseCase
+            )
+        )
 }

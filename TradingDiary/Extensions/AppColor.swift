@@ -15,4 +15,4 @@ extension Color {
 
     static let profit = Color("ProfitGreen")
     static let loss = Color("LossRed")
-}
+}   
