@@ -29,6 +29,7 @@ struct AddTradeView: View {
                 print("save trade")
                 vm.addTrade(
                     symbol: symbol,
+                    side: .long,
                     entry:  Double(entry) ?? 0,
                     exit: Double(exit) ?? 0
                 )

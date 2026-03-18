@@ -23,9 +23,10 @@ final class TradeViewModel: ObservableObject {
         self.trades = fetchTrades.execute()
     }
 
-    func addTrade(symbol: String, entry: Double, exit: Double) {
+    func addTrade(symbol: String, side: Trade.Side = .long, entry: Double, exit: Double) {
         let trade = Trade(
             symbol: symbol,
+            side: side,
             entryPrice: entry,
             exitPrice: exit,
             size: 1,

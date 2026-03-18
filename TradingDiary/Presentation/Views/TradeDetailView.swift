@@ -13,6 +13,7 @@ struct TradeDetailView: View {
     var body: some View {
         VStack{
             Text("Name: \(trade.symbol)")
+            Text("Side: \(trade.side.rawValue)")
             Text("entryPrice: \(trade.entryPrice)")
             Text("exitPrice: \(trade.exitPrice)")
             Text("Date: \(trade.date)")

@@ -9,8 +9,14 @@ import Foundation
 
 struct Trade: Identifiable, Hashable {
 
+    enum Side: String, CaseIterable, Hashable {
+        case long = "LONG"
+        case short = "SHORT"
+    }
+
     let id = UUID()
     let symbol: String
+    let side: Side
     let entryPrice: Double
     let exitPrice: Double
     let size: Double
@@ -19,6 +25,11 @@ struct Trade: Identifiable, Hashable {
     let note: String
 
     var pnl: Double {
-        (exitPrice - entryPrice) * size
+        switch side {
+        case .long:
+            (exitPrice - entryPrice) * size
+        case .short:
+            (entryPrice - exitPrice) * size
+        }
     }
 }
