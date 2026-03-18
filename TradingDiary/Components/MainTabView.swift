@@ -71,5 +71,20 @@ struct MainTabView: View {
 }
 
 #Preview {
-    MainTabView()
+    let container = AppContainer()
+    return MainTabView()
+        .environmentObject(
+            TradeViewModel(
+                fetchTrades: container.fetchTradesUseCase,
+                addTrade: container.addTradeUseCase
+            )
+        )
+        .environmentObject(
+            AuthViewModel(
+                loginUseCase: container.loginUseCase,
+                logoutUseCase: container.logoutUseCase,
+                getAuthState: container.getAuthStateUseCase
+            )
+        )
+        .environmentObject(ThemeManager())
 }

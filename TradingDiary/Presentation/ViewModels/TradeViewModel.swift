@@ -4,14 +4,27 @@
 //
 //  Created by dnkdo on 3/13/26.
 //
-import SwiftUI
+import Foundation
 
-class TradeViewModel: ObservableObject {
+@MainActor
+final class TradeViewModel: ObservableObject {
 
     @Published var trades: [Trade] = []
 
+    private let fetchTrades: FetchTradesUseCase
+    private let addTrade: AddTradeUseCase
+
+    init(
+        fetchTrades: FetchTradesUseCase,
+        addTrade: AddTradeUseCase
+    ) {
+        self.fetchTrades = fetchTrades
+        self.addTrade = addTrade
+        self.trades = fetchTrades.execute()
+    }
+
     func addTrade(symbol: String, entry: Double, exit: Double) {
-    let trade = Trade(
+        let trade = Trade(
             symbol: symbol,
             entryPrice: entry,
             exitPrice: exit,
@@ -21,6 +34,7 @@ class TradeViewModel: ObservableObject {
             note: ""
         )
 
-        trades.append(trade)
+        addTrade.execute(trade)
+        trades = fetchTrades.execute()
     }
 }

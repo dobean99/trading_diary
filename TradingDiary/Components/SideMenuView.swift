@@ -10,6 +10,7 @@ import SwiftUI
 
 struct SideMenuView: View {
     @EnvironmentObject private var auth: AuthViewModel
+    @EnvironmentObject private var themeManager: ThemeManager
 
     var body: some View {
 
@@ -28,6 +29,18 @@ struct SideMenuView: View {
 
             Label("Settings", systemImage: "gearshape")
 
+            HStack(spacing: 12) {
+                Image(systemName: themeManager.isDarkMode ? "moon.stars.fill" : "sun.max.fill")
+                    .foregroundStyle(themeManager.isDarkMode ? Color.appPrimary : Color.profit)
+
+                Text("Dark Mode")
+
+                Spacer()
+
+                Toggle("", isOn: $themeManager.isDarkMode)
+                    .labelsHidden()
+            }
+
             Spacer()
 
             Button {
@@ -38,4 +51,17 @@ struct SideMenuView: View {
         }
         .frame(width: 260, alignment: .leading)
     }
+}
+
+#Preview {
+    let container = AppContainer()
+    return SideMenuView()
+        .environmentObject(ThemeManager())
+        .environmentObject(
+            AuthViewModel(
+                loginUseCase: container.loginUseCase,
+                logoutUseCase: container.logoutUseCase,
+                getAuthState: container.getAuthStateUseCase
+            )
+        )
 }

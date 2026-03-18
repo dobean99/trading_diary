@@ -15,37 +15,39 @@ final class AuthViewModel: ObservableObject {
     @Published var isAuthenticated: Bool = false
     @Published var isLoading: Bool = false
 
+    private let loginUseCase: LoginUseCase
+    private let logoutUseCase: LogoutUseCase
+    private let getAuthState: GetAuthStateUseCase
+
+    init(
+        loginUseCase: LoginUseCase,
+        logoutUseCase: LogoutUseCase,
+        getAuthState: GetAuthStateUseCase
+    ) {
+        self.loginUseCase = loginUseCase
+        self.logoutUseCase = logoutUseCase
+        self.getAuthState = getAuthState
+        self.isAuthenticated = getAuthState.execute()
+    }
+
     func login() {
         errorMessage = nil
-
-        let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
-        let trimmedPassword = password.trimmingCharacters(in: .whitespacesAndNewlines)
-
-        guard !trimmedEmail.isEmpty else {
-            errorMessage = "Email is required."
-            return
-        }
-
-        guard trimmedEmail.contains("@") else {
-            errorMessage = "Please enter a valid email."
-            return
-        }
-
-        guard !trimmedPassword.isEmpty else {
-            errorMessage = "Password is required."
-            return
-        }
 
         isLoading = true
         defer { isLoading = false }
 
-        // Local-only auth placeholder (no backend yet).
-        isAuthenticated = true
-        password = ""
+        do {
+            try loginUseCase.execute(email: email, password: password)
+            isAuthenticated = getAuthState.execute()
+            password = ""
+        } catch {
+            errorMessage = error.localizedDescription
+        }
     }
 
     func logout() {
-        isAuthenticated = false
+        logoutUseCase.execute()
+        isAuthenticated = getAuthState.execute()
         email = ""
         password = ""
         errorMessage = nil

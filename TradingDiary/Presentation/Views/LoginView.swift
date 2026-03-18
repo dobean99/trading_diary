@@ -22,7 +22,7 @@ struct LoginView: View {
             LinearGradient(
                 colors: [
                     Color.backgroundColor,
-                    Color.primary.opacity(0.12),
+                    Color.appPrimary.opacity(0.12),
                     Color.backgroundColor
                 ],
                 startPoint: .topLeading,
@@ -35,8 +35,8 @@ struct LoginView: View {
                     Image(systemName: "chart.line.uptrend.xyaxis.circle.fill")
                         .font(.system(size: 56, weight: .semibold))
                         .symbolRenderingMode(.palette)
-                        .foregroundStyle(Color.primary, Color.primary.opacity(0.25))
-                        .shadow(color: Color.primary.opacity(0.25), radius: 14, y: 6)
+                        .foregroundStyle(Color.appPrimary, Color.appPrimary.opacity(0.25))
+                        .shadow(color: Color.appPrimary.opacity(0.25), radius: 14, y: 6)
 
                     VStack(spacing: 6) {
                         Text("Trading Diary")
@@ -113,10 +113,10 @@ struct LoginView: View {
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
-                    .background(Color.primary)
+                    .background(Color.appPrimary)
                     .foregroundStyle(.white)
                     .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                    .shadow(color: Color.primary.opacity(0.35), radius: 16, y: 10)
+                    .shadow(color: Color.appPrimary.opacity(0.35), radius: 16, y: 10)
                 }
                 .disabled(auth.isLoading)
 
@@ -153,13 +153,20 @@ struct LoginView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                 .overlay(
                     RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .stroke(Color.primary.opacity(0.12), lineWidth: 1)
+                        .stroke(Color.appPrimary.opacity(0.12), lineWidth: 1)
                 )
         }
     }
 }
 
 #Preview {
-    LoginView()
-        .environmentObject(AuthViewModel())
+//    let container = AppContainer()
+//    return LoginView()
+//        .environmentObject(
+//            AuthViewModel(
+//                loginUseCase: container.loginUseCase,
+//                logoutUseCase: container.logoutUseCase,
+//                getAuthState: container.getAuthStateUseCase
+//            )
+//        )
 }

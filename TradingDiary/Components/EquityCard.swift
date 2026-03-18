@@ -16,7 +16,7 @@ struct EquityCard: View {
                 .bold()
         }
         .padding()
-        .background(.profitGreen.opacity(0.2))
+        .background(Color.profit.opacity(0.2))
         .cornerRadius(12)
     }
 }

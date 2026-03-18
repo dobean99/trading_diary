@@ -5,7 +5,7 @@
 //  Created by dnkdo on 3/13/26.
 //
 
-import SwiftUI
+import Foundation
 
 struct Trade: Identifiable, Hashable {
 

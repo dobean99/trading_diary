@@ -38,6 +38,13 @@ struct AddTradeView: View {
 }
 
 #Preview {
-    AddTradeView()
+    let container = AppContainer()
+    return AddTradeView()
+        .environmentObject(
+            TradeViewModel(
+                fetchTrades: container.fetchTradesUseCase,
+                addTrade: container.addTradeUseCase
+            )
+        )
 }
 

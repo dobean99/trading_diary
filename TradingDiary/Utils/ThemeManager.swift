@@ -8,7 +8,8 @@
 
 import SwiftUI
 
-class ThemeManager: ObservableObject {
+@MainActor
+final class ThemeManager: ObservableObject {
 
     @Published var isDarkMode: Bool = false
 
