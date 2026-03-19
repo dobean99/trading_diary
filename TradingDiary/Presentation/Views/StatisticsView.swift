@@ -12,9 +12,6 @@ struct StatisticsView: View {
     @EnvironmentObject private var tradeViewModel: TradeViewModel
     @State private var selectedRange: StatisticsRange = .week
 
-    private let chartBlue = Color(red: 0.18, green: 0.48, blue: 1.0)
-    private let controlBackground = Color(red: 0.95, green: 0.95, blue: 0.97)
-    private let cardBackground = Color(red: 0.96, green: 0.96, blue: 0.98)
     private let neutralText = Color(red: 0.55, green: 0.56, blue: 0.62)
     private let tradePurple = Color(red: 0.61, green: 0.37, blue: 0.94)
 
@@ -112,12 +109,12 @@ struct StatisticsView: View {
                 } label: {
                     Text(range.rawValue)
                         .font(.system(size: 15, weight: .semibold))
-                        .foregroundStyle(selectedRange == range ? chartBlue : neutralText)
+                        .foregroundStyle(selectedRange == range ? .chartBlue : neutralText)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 11)
                         .background(
                             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                .fill(selectedRange == range ? chartBlue.opacity(0.14) : .clear)
+                                .fill(selectedRange == range ? .chartBlue.opacity(0.14) : .clear)
                         )
                 }
                 .buttonStyle(.plain)
@@ -126,7 +123,7 @@ struct StatisticsView: View {
         .padding(6)
         .background(
             RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .fill(controlBackground)
+                .fill(.cardBackground)
         )
     }
 
@@ -146,7 +143,7 @@ struct StatisticsView: View {
                 title: "Win Rate",
                 value: "\(winRate)%",
                 icon: "chart.bar.fill",
-                tint: chartBlue
+                tint: .chartBlue
             )
 
             statisticCard(
@@ -187,7 +184,7 @@ struct StatisticsView: View {
         .padding(18)
         .background(
             RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(cardBackground)
+                .fill(.cardBackground)
         )
     }
 
@@ -201,14 +198,14 @@ struct StatisticsView: View {
                     )
                     .interpolationMethod(.catmullRom)
                     .lineStyle(StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round))
-                    .foregroundStyle(chartBlue)
+                    .foregroundStyle(.chartBlue)
 
                     if point.index == equityPoints.last?.index {
                         PointMark(
                             x: .value("Trade", point.index),
                             y: .value("Equity", point.value)
                         )
-                        .foregroundStyle(chartBlue)
+                        .foregroundStyle(.chartBlue)
                         .symbolSize(50)
                     }
                 }
@@ -244,7 +241,7 @@ struct StatisticsView: View {
             }
             .chartPlotStyle { plotArea in
                 plotArea
-                    .background(Color.white)
+                    .background(.cardBackground)
             }
             .frame(height: 215)
             .padding(.horizontal, 10)
@@ -252,7 +249,7 @@ struct StatisticsView: View {
         }
         .background(
             RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .fill(Color.white)
+                .fill(.cardBackground)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 24, style: .continuous)

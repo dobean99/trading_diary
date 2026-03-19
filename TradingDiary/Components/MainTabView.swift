@@ -9,14 +9,10 @@ import SwiftUI
 
 struct MainTabView: View {
     @State private var showMenu = false
+    private let menuWidth: CGFloat = 280
     
     var body: some View {
         ZStack(alignment: .leading) {
-            
-            Color(.systemBackground)
-                .ignoresSafeArea()
-            SideMenuView()
-                
             TabView{
                 NavigationStack {
                     DashboardView(showMenu: $showMenu)
@@ -44,24 +40,40 @@ struct MainTabView: View {
                 .tabItem {
                     Label("Stats", systemImage: "chart.line.uptrend.xyaxis")
                 }
+
+                NavigationStack {
+                    CalendarView()
+                }
+                .tabItem {
+                    Label("Calendar", systemImage: "calendar")
+                }
             }
-            .background(Color.clear)
-            .offset(x: showMenu ? 260 : 0)
-            //        .scaleEffect(showMenu ? 0.9 : 1)
-            .cornerRadius(showMenu ? 20 : 0)
-            .animation(.easeInOut(duration: 0.3), value: showMenu)
             .disabled(showMenu)
-            .shadow(color: .black.opacity(showMenu ? 0.2 : 0), radius: 10)
+            
+            if showMenu {
+                Color.black.opacity(0.32)
+                    .ignoresSafeArea()
+                    .transition(.opacity)
+                    .onTapGesture {
+                        withAnimation(.easeInOut(duration: 0.25)) {
+                            showMenu = false
+                        }
+                    }
+            }
+            
+            SideMenuView()
+                .offset(x: showMenu ? 0 : -menuWidth - 24)
+                .accessibilityHidden(!showMenu)
         }
-       
+        .animation(.easeInOut(duration: 0.25), value: showMenu)
         .gesture(
             DragGesture()
                 .onEnded { value in
-                    if value.translation.width > 100 {
+                    if value.translation.width > 80 {
                         showMenu = true
                     }
-                    
-                    if value.translation.width < -100 {
+                        
+                    if value.translation.width < -80 {
                         showMenu = false
                     }
                 }

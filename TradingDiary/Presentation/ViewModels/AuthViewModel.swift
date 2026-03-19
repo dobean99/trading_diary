@@ -31,17 +31,21 @@ final class AuthViewModel: ObservableObject {
     }
 
     func login() {
+        guard !isLoading else { return }
+
         errorMessage = nil
-
         isLoading = true
-        defer { isLoading = false }
 
-        do {
-            try loginUseCase.execute(email: email, password: password)
-            isAuthenticated = getAuthState.execute()
-            password = ""
-        } catch {
-            errorMessage = error.localizedDescription
+        Task {
+            defer { isLoading = false }
+
+            do {
+                try await loginUseCase.execute(email: email, password: password)
+                isAuthenticated = getAuthState.execute()
+                password = ""
+            } catch {
+                errorMessage = error.localizedDescription
+            }
         }
     }
 

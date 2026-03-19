@@ -7,8 +7,7 @@ struct LoginUseCase {
         self.repository = repository
     }
 
-    func execute(email: String, password: String) throws {
-        try repository.login(email: email, password: password)
+    func execute(email: String, password: String) async throws {
+        try await repository.login(email: email, password: password)
     }
 }
-
