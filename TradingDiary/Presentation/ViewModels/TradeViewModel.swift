@@ -10,6 +10,7 @@ import Foundation
 final class TradeViewModel: ObservableObject {
 
     @Published var trades: [Trade] = []
+    @Published var errorMessage: String? = nil
 
     private let fetchTrades: FetchTradesUseCase
     private let addTrade: AddTradeUseCase
@@ -20,7 +21,10 @@ final class TradeViewModel: ObservableObject {
     ) {
         self.fetchTrades = fetchTrades
         self.addTrade = addTrade
-        self.trades = fetchTrades.execute()
+
+        Task {
+            await reloadTrades()
+        }
     }
 
     func addTrade(symbol: String, side: Trade.Side = .long, entry: Double, exit: Double) {
@@ -36,6 +40,17 @@ final class TradeViewModel: ObservableObject {
         )
 
         addTrade.execute(trade)
-        trades = fetchTrades.execute()
+        Task {
+            await reloadTrades()
+        }
+    }
+
+    func reloadTrades() async {
+        do {
+            trades = try await fetchTrades.execute()
+            errorMessage = nil
+        } catch {
+            errorMessage = error.localizedDescription
+        }
     }
 }

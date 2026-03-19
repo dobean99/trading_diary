@@ -2,9 +2,11 @@ import Foundation
 
 @MainActor
 final class AppContainer {
+    lazy var networkManager = NetworkManager(baseURLString: "http://localhost:8000")
+
     // Repositories (Data layer)
-    lazy var tradeRepository: TradeRepository = InMemoryTradeRepository()
-    lazy var authRepository: AuthRepository = LocalAuthRepository()
+    lazy var tradeRepository: TradeRepository = InMemoryTradeRepository(networkManager: networkManager)
+    lazy var authRepository: AuthRepository = LocalAuthRepository(networkManager: networkManager)
 
     // Use cases (Domain layer)
     lazy var fetchTradesUseCase = FetchTradesUseCase(repository: tradeRepository)
@@ -14,4 +16,3 @@ final class AppContainer {
     lazy var logoutUseCase = LogoutUseCase(repository: authRepository)
     lazy var getAuthStateUseCase = GetAuthStateUseCase(repository: authRepository)
 }
-

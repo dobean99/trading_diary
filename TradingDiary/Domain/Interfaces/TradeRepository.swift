@@ -1,7 +1,6 @@
 import Foundation
 
 protocol TradeRepository {
-    func fetchTrades() -> [Trade]
+    func fetchTrades() async throws -> [Trade]
     func addTrade(_ trade: Trade)
 }
-

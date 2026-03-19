@@ -3,7 +3,11 @@ import Foundation
 @MainActor
 final class LocalAuthRepository: AuthRepository {
     private(set) var isAuthenticated: Bool = false
-    private let loginURL = URL(string: "http://localhost:8000/api/v1/login")
+    private let networkManager: NetworkManager
+
+    init(networkManager: NetworkManager = NetworkManager()) {
+        self.networkManager = networkManager
+    }
 
     func login(email: String, password: String) async throws {
         let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -12,31 +16,31 @@ final class LocalAuthRepository: AuthRepository {
         guard !trimmedEmail.isEmpty else { throw AuthError.emailRequired }
         guard trimmedEmail.contains("@") else { throw AuthError.invalidEmail }
         guard !trimmedPassword.isEmpty else { throw AuthError.passwordRequired }
-        guard let loginURL else { throw AuthError.invalidResponse }
-
-        var request = URLRequest(url: loginURL)
-        request.httpMethod = "POST"
-        request.timeoutInterval = 15
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = try JSONEncoder().encode(LoginRequest(email: trimmedEmail, password: trimmedPassword))
 
         do {
-            let (data, response) = try await URLSession.shared.data(for: request)
-            guard let httpResponse = response as? HTTPURLResponse else {
-                throw AuthError.invalidResponse
-            }
+            let result = try await networkManager.request(
+                path: "/api/v1/login",
+                method: .post,
+                body: LoginRequest(email: trimmedEmail, password: trimmedPassword),
+                headers: [
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                ]
+            )
 
-            switch httpResponse.statusCode {
+            switch result.response.statusCode {
             case 200 ... 299:
                 isAuthenticated = true
             case 401:
                 throw AuthError.invalidCredentials
             default:
-                let message = extractErrorMessage(from: data) ?? "Login failed (\(httpResponse.statusCode))."
+                let message = extractErrorMessage(from: result.data) ?? "Login failed (\(result.response.statusCode))."
                 throw AuthError.server(message: message)
             }
         } catch let authError as AuthError {
             throw authError
+        } catch let apiError as APIError {
+            throw AuthError.network(message: apiError.localizedDescription)
         } catch {
             throw AuthError.network(message: "Unable to connect to login server.")
         }

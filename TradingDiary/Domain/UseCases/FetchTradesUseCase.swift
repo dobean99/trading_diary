@@ -7,8 +7,7 @@ struct FetchTradesUseCase {
         self.repository = repository
     }
 
-    func execute() -> [Trade] {
-        repository.fetchTrades()
+    func execute() async throws -> [Trade] {
+        try await repository.fetchTrades()
     }
 }
-
