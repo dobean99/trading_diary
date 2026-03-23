@@ -2,7 +2,7 @@ import Foundation
 
 @MainActor
 final class AppContainer {
-    lazy var networkManager = NetworkManager(baseURLString: "http://localhost:8000")
+    lazy var networkManager = NetworkManager(baseURLString: "http://127.0.0.1:18081")
 
     // Repositories (Data layer)
     lazy var tradeRepository: TradeRepository = InMemoryTradeRepository(networkManager: networkManager)

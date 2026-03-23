@@ -19,15 +19,15 @@ final class LocalAuthRepository: AuthRepository {
 
         do {
             let result = try await networkManager.request(
-                path: "/api/v1/login",
+                path: "/api/v1/auth/login",
                 method: .post,
-                body: LoginRequest(email: trimmedEmail, password: trimmedPassword),
+                body: LoginRequest(username: trimmedEmail, password: trimmedPassword),
                 headers: [
                     "Content-Type": "application/json",
-                    "Accept": "application/json"
+//                    "Accept": "application/json"
                 ]
             )
-
+            print("result", result)
             switch result.response.statusCode {
             case 200 ... 299:
                 isAuthenticated = true
@@ -52,7 +52,7 @@ final class LocalAuthRepository: AuthRepository {
 }
 
 private struct LoginRequest: Encodable {
-    let email: String
+    let username: String
     let password: String
 }
 

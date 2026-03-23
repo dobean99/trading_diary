@@ -32,7 +32,7 @@ final class NetworkManager {
     private let baseURL: URL?
     private let session: URLSession
 
-    init(baseURLString: String = "http://localhost:8000", session: URLSession = .shared) {
+    init(baseURLString: String = "http://127.0.0.1:18081", session: URLSession = .shared) {
         self.baseURL = URL(string: baseURLString)
         self.session = session
     }
@@ -61,7 +61,7 @@ final class NetworkManager {
 
         if let body {
             do {
-                request.httpBody = try JSONEncoder().encode(AnyEncodable(body))
+                request.httpBody = try makeEncoder().encode(AnyEncodable(body))
                 if headers["Content-Type"] == nil {
                     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
                 }
@@ -81,6 +81,17 @@ final class NetworkManager {
             throw APIError.transportError
         }
     }
+}
+
+private func makeEncoder() -> JSONEncoder {
+    let encoder = JSONEncoder()
+    encoder.dateEncodingStrategy = .custom { date, encoder in
+        var container = encoder.singleValueContainer()
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        try container.encode(formatter.string(from: date))
+    }
+    return encoder
 }
 
 private struct AnyEncodable: Encodable {

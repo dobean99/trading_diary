@@ -102,7 +102,32 @@ final class InMemoryTradeRepository: TradeRepository {
         return storage
     }
 
-    func addTrade(_ trade: Trade) {
+    func addTrade(_ trade: Trade, openedAt: Date, closedAt: Date?) async throws {
+        let payload = AddTradeRequest(
+            symbol: trade.symbol,
+            side: trade.side == .long ? "BUY" : "SELL",
+            quantity: trade.size,
+            entryPrice: trade.entryPrice,
+            exitPrice: trade.exitPrice,
+            openedAt: openedAt,
+            closedAt: closedAt ?? openedAt,
+            notes: trade.note
+        )
+
+        let result = try await networkManager.request(
+            path: "/api/v1/trades",
+            method: .post,
+            body: payload,
+            headers: [
+                "Accept": "application/json",
+                "Content-Type": "application/json"
+            ]
+        )
+
+        guard (200...299).contains(result.response.statusCode) else {
+            throw APIError.invalidResponse
+        }
+
         storage.append(trade)
     }
 }
@@ -154,7 +179,9 @@ private struct TradePayload: Decodable {
     }
 
     var asDomainTrade: Trade {
-        let mappedSide: Trade.Side = side.lowercased() == "short" ? .short : .long
+        let normalizedSide = side.lowercased()
+        let mappedSide: Trade.Side =
+            (normalizedSide == "short" || normalizedSide == "sell") ? .short : .long
         return Trade(
             symbol: symbol,
             side: mappedSide,
@@ -197,4 +224,26 @@ private func makeDecoder() -> JSONDecoder {
         throw DecodingError.dataCorruptedError(in: container, debugDescription: "Unsupported date format")
     }
     return decoder
+}
+
+private struct AddTradeRequest: Encodable {
+    let symbol: String
+    let side: String
+    let quantity: Double
+    let entryPrice: Double
+    let exitPrice: Double
+    let openedAt: Date
+    let closedAt: Date
+    let notes: String
+
+    enum CodingKeys: String, CodingKey {
+        case symbol
+        case side
+        case quantity
+        case entryPrice = "entry_price"
+        case exitPrice = "exit_price"
+        case openedAt = "opened_at"
+        case closedAt = "closed_at"
+        case notes
+    }
 }

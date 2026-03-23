@@ -27,22 +27,52 @@ final class TradeViewModel: ObservableObject {
         }
     }
 
-    func addTrade(symbol: String, side: Trade.Side = .long, entry: Double, exit: Double) {
+    @discardableResult
+    func addTrade(
+        symbol: String,
+        side: Trade.Side = .long,
+        quantity: Double = 1,
+        entry: Double,
+        exit: Double,
+        openedAt: Date = .now,
+        closedAt: Date? = nil,
+        notes: String = "",
+        strategy: String = "Manual"
+    ) async -> Bool {
         let trade = Trade(
             symbol: symbol,
             side: side,
             entryPrice: entry,
             exitPrice: exit,
-            size: 1,
-            date: Date(),
-            strategy: "Breakout",
-            note: ""
+            size: quantity,
+            date: closedAt ?? openedAt,
+            strategy: strategy,
+            note: notes
         )
 
-        addTrade.execute(trade)
-        Task {
+        do {
+            try await addTrade.execute(trade, openedAt: openedAt, closedAt: closedAt)
             await reloadTrades()
+            return true
+        } catch {
+            errorMessage = error.localizedDescription
+            return false
         }
+    }
+
+    @discardableResult
+    func addTrade(symbol: String, side: Trade.Side = .long, entry: Double, exit: Double) async -> Bool {
+        await addTrade(
+            symbol: symbol,
+            side: side,
+            quantity: 1,
+            entry: entry,
+            exit: exit,
+            openedAt: .now,
+            closedAt: nil,
+            notes: "",
+            strategy: "Manual"
+        )
     }
 
     func reloadTrades() async {
