@@ -1,5 +1,6 @@
 import Foundation
 
+@MainActor
 protocol AuthRepository {
     var isAuthenticated: Bool { get }
     func login(email: String, password: String) async throws

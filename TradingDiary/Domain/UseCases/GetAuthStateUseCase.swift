@@ -7,7 +7,7 @@ struct GetAuthStateUseCase {
         self.repository = repository
     }
 
-    func execute() -> Bool {
+    @MainActor func execute() -> Bool {
         repository.isAuthenticated
     }
 }

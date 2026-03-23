@@ -31,10 +31,16 @@ enum APIError: LocalizedError {
 final class NetworkManager {
     private let baseURL: URL?
     private let session: URLSession
+    private var bearerToken: String?
 
     init(baseURLString: String = "http://127.0.0.1:18081", session: URLSession = .shared) {
         self.baseURL = URL(string: baseURLString)
         self.session = session
+    }
+
+    func setBearerToken(_ token: String?) {
+        let value = token?.trimmingCharacters(in: .whitespacesAndNewlines)
+        bearerToken = (value?.isEmpty == false) ? value : nil
     }
 
     func request(
@@ -57,6 +63,10 @@ final class NetworkManager {
 
         headers.forEach { key, value in
             request.setValue(value, forHTTPHeaderField: key)
+        }
+
+        if request.value(forHTTPHeaderField: "Authorization") == nil, let bearerToken {
+            request.setValue("Bearer \(bearerToken)", forHTTPHeaderField: "Authorization")
         }
 
         if let body {

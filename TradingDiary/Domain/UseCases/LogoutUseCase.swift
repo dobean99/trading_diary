@@ -7,7 +7,7 @@ struct LogoutUseCase {
         self.repository = repository
     }
 
-    func execute() {
+    @MainActor func execute() {
         repository.logout()
     }
 }

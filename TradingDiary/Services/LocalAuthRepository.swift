@@ -4,9 +4,18 @@ import Foundation
 final class LocalAuthRepository: AuthRepository {
     private(set) var isAuthenticated: Bool = false
     private let networkManager: NetworkManager
+    private let tokenStore: JWTTokenStore
 
-    init(networkManager: NetworkManager = NetworkManager()) {
+    init(
+        networkManager: NetworkManager = NetworkManager(),
+        tokenStore: JWTTokenStore = KeychainJWTTokenStore()
+    ) {
         self.networkManager = networkManager
+        self.tokenStore = tokenStore
+
+        let storedToken = tokenStore.loadToken()
+        networkManager.setBearerToken(storedToken)
+        isAuthenticated = storedToken != nil
     }
 
     func login(email: String, password: String) async throws {
@@ -24,14 +33,28 @@ final class LocalAuthRepository: AuthRepository {
                 body: LoginRequest(username: trimmedEmail, password: trimmedPassword),
                 headers: [
                     "Content-Type": "application/json",
-//                    "Accept": "application/json"
+                    "Accept": "application/json"
                 ]
             )
-            print("result", result)
+
             switch result.response.statusCode {
             case 200 ... 299:
+                let tokenResponse = try decodeTokenResponse(from: result.data)
+                guard tokenResponse.tokenType.lowercased() == "bearer" else {
+                    throw AuthError.invalidResponse
+                }
+
+                do {
+                    try tokenStore.save(token: tokenResponse.accessToken)
+                } catch {
+                    throw AuthError.network(message: error.localizedDescription)
+                }
+
+                networkManager.setBearerToken(tokenResponse.accessToken)
                 isAuthenticated = true
             case 401:
+                networkManager.setBearerToken(nil)
+                tokenStore.clearToken()
                 throw AuthError.invalidCredentials
             default:
                 let message = extractErrorMessage(from: result.data) ?? "Login failed (\(result.response.statusCode))."
@@ -47,6 +70,8 @@ final class LocalAuthRepository: AuthRepository {
     }
 
     func logout() {
+        networkManager.setBearerToken(nil)
+        tokenStore.clearToken()
         isAuthenticated = false
     }
 }
@@ -54,6 +79,24 @@ final class LocalAuthRepository: AuthRepository {
 private struct LoginRequest: Encodable {
     let username: String
     let password: String
+}
+
+private struct LoginTokenResponse: Decodable {
+    let accessToken: String
+    let tokenType: String
+
+    enum CodingKeys: String, CodingKey {
+        case accessToken = "access_token"
+        case tokenType = "token_type"
+    }
+}
+
+private func decodeTokenResponse(from data: Data) throws -> LoginTokenResponse {
+    let decoded = try JSONDecoder().decode(LoginTokenResponse.self, from: data)
+    guard !decoded.accessToken.isEmpty else {
+        throw AuthError.invalidResponse
+    }
+    return decoded
 }
 
 private func extractErrorMessage(from data: Data) -> String? {
