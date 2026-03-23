@@ -13,6 +13,7 @@ struct TradingDiaryApp: App {
     @StateObject private var themeManager: ThemeManager
     @StateObject private var tradeViewModel: TradeViewModel
     @StateObject private var authViewModel: AuthViewModel
+    @StateObject private var marketViewModel: MarketViewModel
 
     private let container: AppContainer
 
@@ -34,6 +35,9 @@ struct TradingDiaryApp: App {
                 getAuthState: container.getAuthStateUseCase
             )
         )
+        _marketViewModel = StateObject(
+            wrappedValue: MarketViewModel(fetchMarketPrices: container.fetchMarketPricesUseCase)
+        )
     }
 
     var body: some Scene {
@@ -48,6 +52,7 @@ struct TradingDiaryApp: App {
             .environmentObject(tradeViewModel)
             .environmentObject(themeManager)
             .environmentObject(authViewModel)
+            .environmentObject(marketViewModel)
             .preferredColorScheme(themeManager.colorScheme)
         }
     }

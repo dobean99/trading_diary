@@ -11,6 +11,7 @@ import Charts
 struct DashboardView: View {
     @Binding var showMenu: Bool
     @EnvironmentObject private var tradeViewModel: TradeViewModel
+    @EnvironmentObject private var marketViewModel: MarketViewModel
     
     var body: some View {
         NavigationStack {
@@ -21,6 +22,7 @@ struct DashboardView: View {
                     statsGrid
                     performanceSection
                     tradeQualitySection
+                    marketPricesSection
                     todaysTradesSection
                 }
                 .padding(.horizontal, 20)
@@ -28,6 +30,9 @@ struct DashboardView: View {
                 .padding(.bottom, 32)
             }
             .background(Color.backgroundColor.ignoresSafeArea())
+            .task {
+                await marketViewModel.reload()
+            }
         }
     }
     
@@ -266,6 +271,87 @@ struct DashboardView: View {
             .padding(.vertical, 4)
         }
     }
+
+    private var marketPricesSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Market Prices")
+                    .font(AppFont.subtitle)
+                Spacer()
+                if !marketViewModel.exchange.isEmpty {
+                    Text(marketViewModel.exchange)
+                        .font(AppFont.caption)
+                        .foregroundStyle(.secondary)
+                }
+                Button {
+                    Task { await marketViewModel.reload() }
+                } label: {
+                    Image(systemName: "arrow.clockwise")
+                        .font(.system(size: 13, weight: .semibold))
+                        .padding(8)
+                        .background(Color.appPrimary.opacity(0.12))
+                        .clipShape(Circle())
+                }
+                .buttonStyle(.plain)
+            }
+
+            VStack(alignment: .leading, spacing: 0) {
+                if marketViewModel.isLoading && marketViewModel.items.isEmpty {
+                    HStack {
+                        ProgressView()
+                        Text("Loading prices...")
+                            .font(AppFont.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding()
+                } else if let errorMessage = marketViewModel.errorMessage, marketViewModel.items.isEmpty {
+                    Text(errorMessage)
+                        .font(AppFont.caption)
+                        .foregroundStyle(.secondary)
+                        .padding()
+                } else {
+                    ForEach(Array(marketViewModel.items.prefix(6))) { item in
+                        marketPriceRow(item)
+
+                        if item.id != marketViewModel.items.prefix(6).last?.id {
+                            Divider()
+                                .padding(.leading, 16)
+                        }
+                    }
+                }
+            }
+            .background(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .fill(Color.card)
+            )
+            .shadow(color: .black.opacity(0.04), radius: 8, x: 0, y: 4)
+
+            if marketViewModel.total > 0 {
+                Text("Total symbols: \(marketViewModel.total)")
+                    .font(AppFont.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    private func marketPriceRow(_ item: MarketPrice) -> some View {
+        HStack {
+            Text(item.symbol)
+                .font(AppFont.body)
+
+            Spacer()
+
+            Text(String(format: "$%.2f", item.price))
+                .font(AppFont.body)
+
+            Text(String(format: "%.2f%%", item.change24hPct))
+                .font(AppFont.caption)
+                .foregroundStyle(item.change24hPct >= 0 ? Color.profit : Color.loss)
+                .frame(width: 72, alignment: .trailing)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+    }
 }
 
 #Preview {
@@ -275,4 +361,5 @@ struct DashboardView: View {
             fetchTrades: container.fetchTradesUseCase,
             addTrade: container.addTradeUseCase
         ))
+        .environmentObject(MarketViewModel(fetchMarketPrices: container.fetchMarketPricesUseCase))
 }

@@ -98,5 +98,8 @@ struct MainTabView: View {
                 getAuthState: container.getAuthStateUseCase
             )
         )
+        .environmentObject(
+            MarketViewModel(fetchMarketPrices: container.fetchMarketPricesUseCase)
+        )
         .environmentObject(ThemeManager())
 }
