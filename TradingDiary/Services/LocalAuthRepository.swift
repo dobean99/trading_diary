@@ -13,9 +13,12 @@ final class LocalAuthRepository: AuthRepository {
         self.networkManager = networkManager
         self.tokenStore = tokenStore
 
-        let storedToken = tokenStore.loadToken()
-        networkManager.setBearerToken(storedToken)
-        isAuthenticated = storedToken != nil
+        if let storedToken = tokenStore.loadToken(), !isTokenExpired(storedToken) {
+            networkManager.setBearerToken(storedToken)
+            isAuthenticated = true
+        } else {
+            clearSession()
+        }
     }
 
     func login(email: String, password: String) async throws {
@@ -43,6 +46,9 @@ final class LocalAuthRepository: AuthRepository {
                 guard tokenResponse.tokenType.lowercased() == "bearer" else {
                     throw AuthError.invalidResponse
                 }
+                guard !isTokenExpired(tokenResponse.accessToken) else {
+                    throw AuthError.invalidResponse
+                }
 
                 do {
                     try tokenStore.save(token: tokenResponse.accessToken)
@@ -53,8 +59,7 @@ final class LocalAuthRepository: AuthRepository {
                 networkManager.setBearerToken(tokenResponse.accessToken)
                 isAuthenticated = true
             case 401:
-                networkManager.setBearerToken(nil)
-                tokenStore.clearToken()
+                clearSession()
                 throw AuthError.invalidCredentials
             default:
                 let message = extractErrorMessage(from: result.data) ?? "Login failed (\(result.response.statusCode))."
@@ -70,6 +75,10 @@ final class LocalAuthRepository: AuthRepository {
     }
 
     func logout() {
+        clearSession()
+    }
+
+    private func clearSession() {
         networkManager.setBearerToken(nil)
         tokenStore.clearToken()
         isAuthenticated = false
@@ -97,6 +106,31 @@ private func decodeTokenResponse(from data: Data) throws -> LoginTokenResponse {
         throw AuthError.invalidResponse
     }
     return decoded
+}
+
+private func isTokenExpired(_ token: String) -> Bool {
+    let parts = token.split(separator: ".")
+    guard parts.count == 3 else {
+        return true
+    }
+
+    var payload = String(parts[1])
+        .replacingOccurrences(of: "-", with: "+")
+        .replacingOccurrences(of: "_", with: "/")
+
+    while payload.count % 4 != 0 {
+        payload.append("=")
+    }
+
+    guard
+        let payloadData = Data(base64Encoded: payload),
+        let object = try? JSONSerialization.jsonObject(with: payloadData) as? [String: Any],
+        let exp = object["exp"] as? TimeInterval
+    else {
+        return true
+    }
+
+    return Date().timeIntervalSince1970 >= exp
 }
 
 private func extractErrorMessage(from data: Data) -> String? {

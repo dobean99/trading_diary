@@ -47,6 +47,7 @@ final class NetworkManager {
         path: String,
         method: HTTPMethod,
         body: Encodable? = nil,
+        queryItems: [URLQueryItem]? = nil,
         headers: [String: String] = [:],
         timeout: TimeInterval = 15
     ) async throws -> (data: Data, response: HTTPURLResponse) {
@@ -55,7 +56,18 @@ final class NetworkManager {
         }
 
         let normalizedPath = path.hasPrefix("/") ? path : "/\(path)"
-        let url = baseURL.appendingPathComponent(String(normalizedPath.dropFirst()))
+        let resolvedURL = baseURL.appendingPathComponent(String(normalizedPath.dropFirst()))
+        guard var components = URLComponents(url: resolvedURL, resolvingAgainstBaseURL: false) else {
+            throw APIError.invalidBaseURL
+        }
+
+        if let queryItems, !queryItems.isEmpty {
+            components.queryItems = queryItems
+        }
+
+        guard let url = components.url else {
+            throw APIError.invalidBaseURL
+        }
 
         var request = URLRequest(url: url)
         request.httpMethod = method.rawValue

@@ -307,7 +307,7 @@ struct DashboardView: View {
                 } else if let errorMessage = marketViewModel.errorMessage, marketViewModel.items.isEmpty {
                     Text(errorMessage)
                         .font(AppFont.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(.lossRed)
                         .padding()
                 } else {
                     ForEach(Array(marketViewModel.items.prefix(6))) { item in

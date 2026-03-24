@@ -19,9 +19,17 @@ final class InMemoryMarketRepository: MarketRepository {
     )
 
     func fetchPrices() async throws -> MarketPriceSnapshot {
+        let queryItems: [URLQueryItem] = [
+            URLQueryItem(name: "exchange", value: "bingx"),
+            URLQueryItem(name: "spot_only", value: "true"),
+            URLQueryItem(name: "active_only", value: "true"),
+            URLQueryItem(name: "limit", value: "10")
+        ]
+
         let result = try await networkManager.request(
             path: "/api/v1/markets/prices",
             method: .get,
+            queryItems: queryItems,
             headers: ["Accept": "application/json"]
         )
 
