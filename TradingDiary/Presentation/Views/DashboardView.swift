@@ -310,8 +310,14 @@ struct DashboardView: View {
                         .foregroundStyle(.lossRed)
                         .padding()
                 } else {
+                    let exchange = marketViewModel.exchange.isEmpty ? "bingx" : marketViewModel.exchange
                     ForEach(Array(marketViewModel.items.prefix(6))) { item in
-                        marketPriceRow(item)
+                        NavigationLink {
+                            MarketOHLCVChartView(exchange: exchange, symbol: item.symbol)
+                        } label: {
+                            marketPriceRow(item)
+                        }
+                        .buttonStyle(.plain)
 
                         if item.id != marketViewModel.items.prefix(6).last?.id {
                             Divider()
@@ -361,5 +367,10 @@ struct DashboardView: View {
             fetchTrades: container.fetchTradesUseCase,
             addTrade: container.addTradeUseCase
         ))
-        .environmentObject(MarketViewModel(fetchMarketPrices: container.fetchMarketPricesUseCase))
+        .environmentObject(
+            MarketViewModel(
+                fetchMarketPrices: container.fetchMarketPricesUseCase,
+                fetchMarketOHLCV: container.fetchMarketOHLCVUseCase
+            )
+        )
 }

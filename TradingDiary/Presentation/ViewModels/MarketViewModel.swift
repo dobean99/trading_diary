@@ -9,9 +9,14 @@ final class MarketViewModel: ObservableObject {
     @Published var isLoading = false
 
     private let fetchMarketPrices: FetchMarketPricesUseCase
+    private let fetchMarketOHLCV: FetchMarketOHLCVUseCase
 
-    init(fetchMarketPrices: FetchMarketPricesUseCase) {
+    init(
+        fetchMarketPrices: FetchMarketPricesUseCase,
+        fetchMarketOHLCV: FetchMarketOHLCVUseCase
+    ) {
         self.fetchMarketPrices = fetchMarketPrices
+        self.fetchMarketOHLCV = fetchMarketOHLCV
 
         Task {
             await reload()
@@ -32,5 +37,19 @@ final class MarketViewModel: ObservableObject {
         } catch {
             errorMessage = error.localizedDescription
         }
+    }
+
+    func loadOHLCV(
+        exchange: String,
+        symbol: String,
+        timeframe: String = "1h",
+        limit: Int = 100
+    ) async throws -> MarketOHLCVSnapshot {
+        try await fetchMarketOHLCV.execute(
+            exchange: exchange,
+            symbol: symbol,
+            timeframe: timeframe,
+            limit: limit
+        )
     }
 }

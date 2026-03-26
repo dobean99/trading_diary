@@ -44,6 +44,35 @@ final class InMemoryMarketRepository: MarketRepository {
         return decoded
     }
 
+    func fetchOHLCV(
+        exchange: String,
+        symbol: String,
+        timeframe: String,
+        limit: Int
+    ) async throws -> MarketOHLCVSnapshot {
+        let queryItems = [
+            URLQueryItem(name: "exchange", value: exchange),
+            URLQueryItem(name: "symbol", value: symbol),
+            URLQueryItem(name: "timeframe", value: timeframe),
+            URLQueryItem(name: "limit", value: String(limit))
+        ]
+
+        let result = try await networkManager.request(
+            path: "/api/v1/markets/ohlcv",
+            method: .get,
+            queryItems: queryItems,
+            headers: ["Accept": "application/json"]
+        )
+
+        guard (200...299).contains(result.response.statusCode) else {
+            let message = extractAPIErrorMessage(from: result.data)
+                ?? "Failed to load OHLCV (\(result.response.statusCode))."
+            throw MarketDataError.server(message: message)
+        }
+
+        return try decodeOHLCVSnapshot(from: result.data)
+    }
+
     private func decodeSnapshot(from data: Data) throws -> MarketPriceSnapshot {
         let decoder = JSONDecoder()
         if let payload = try? decoder.decode(MarketPricesPayload.self, from: data) {
@@ -51,6 +80,19 @@ final class InMemoryMarketRepository: MarketRepository {
         }
 
         if let wrapped = try? decoder.decode(MarketPricesEnvelope.self, from: data) {
+            return wrapped.data.asDomain
+        }
+
+        throw MarketDataError.invalidResponse
+    }
+
+    private func decodeOHLCVSnapshot(from data: Data) throws -> MarketOHLCVSnapshot {
+        let decoder = JSONDecoder()
+        if let payload = try? decoder.decode(MarketOHLCVPayload.self, from: data) {
+            return payload.asDomain
+        }
+
+        if let wrapped = try? decoder.decode(MarketOHLCVEnvelope.self, from: data) {
             return wrapped.data.asDomain
         }
 
@@ -89,6 +131,50 @@ private struct MarketPricePayload: Decodable {
 
     var asDomain: MarketPrice {
         MarketPrice(symbol: symbol, price: price, change24hPct: change24hPct)
+    }
+}
+
+private struct MarketOHLCVEnvelope: Decodable {
+    let data: MarketOHLCVPayload
+}
+
+private struct MarketOHLCVPayload: Decodable {
+    let exchange: String
+    let symbol: String
+    let timeframe: String
+    let total: Int
+    let items: [OHLCVCandlePayload]
+
+    var asDomain: MarketOHLCVSnapshot {
+        MarketOHLCVSnapshot(
+            exchange: exchange,
+            symbol: symbol,
+            timeframe: timeframe,
+            total: total,
+            items: items.map(\.asDomain)
+        )
+    }
+}
+
+private struct OHLCVCandlePayload: Decodable {
+    let timestamp: TimeInterval
+    let datetime: String
+    let open: Double
+    let high: Double
+    let low: Double
+    let close: Double
+    let volume: Double
+
+    var asDomain: OHLCVCandle {
+        OHLCVCandle(
+            timestamp: timestamp,
+            datetime: datetime,
+            open: open,
+            high: high,
+            low: low,
+            close: close,
+            volume: volume
+        )
     }
 }
 

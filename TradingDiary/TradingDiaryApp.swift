@@ -36,7 +36,10 @@ struct TradingDiaryApp: App {
             )
         )
         _marketViewModel = StateObject(
-            wrappedValue: MarketViewModel(fetchMarketPrices: container.fetchMarketPricesUseCase)
+            wrappedValue: MarketViewModel(
+                fetchMarketPrices: container.fetchMarketPricesUseCase,
+                fetchMarketOHLCV: container.fetchMarketOHLCVUseCase
+            )
         )
     }
 

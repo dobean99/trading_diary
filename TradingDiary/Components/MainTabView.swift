@@ -99,7 +99,10 @@ struct MainTabView: View {
             )
         )
         .environmentObject(
-            MarketViewModel(fetchMarketPrices: container.fetchMarketPricesUseCase)
+            MarketViewModel(
+                fetchMarketPrices: container.fetchMarketPricesUseCase,
+                fetchMarketOHLCV: container.fetchMarketOHLCVUseCase
+            )
         )
         .environmentObject(ThemeManager())
 }

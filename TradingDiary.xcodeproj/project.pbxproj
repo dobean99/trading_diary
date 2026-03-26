@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		F0A1B2C3D4E5F60718293A01 /* SwiftTradingView in Frameworks */ = {isa = PBXBuildFile; productRef = F0A1B2C3D4E5F60718293A02 /* SwiftTradingView */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		EBBD00DB2F63FF6F006513C9 /* TradingDiary.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TradingDiary.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +27,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F0A1B2C3D4E5F60718293A01 /* SwiftTradingView in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +70,7 @@
 			);
 			name = TradingDiary;
 			packageProductDependencies = (
+				F0A1B2C3D4E5F60718293A02 /* SwiftTradingView */,
 			);
 			productName = TradingDiary;
 			productReference = EBBD00DB2F63FF6F006513C9 /* TradingDiary.app */;
@@ -94,6 +100,9 @@
 			);
 			mainGroup = EBBD00D22F63FF6F006513C9;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				F0A1B2C3D4E5F60718293A03 /* XCRemoteSwiftPackageReference "swift-trading-view" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = EBBD00DC2F63FF6F006513C9 /* Products */;
 			projectDirPath = "";
@@ -123,6 +132,17 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		F0A1B2C3D4E5F60718293A03 /* XCRemoteSwiftPackageReference "swift-trading-view" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sergeykhliustin/swift-trading-view.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCBuildConfiguration section */
 		EBBD00E72F63FF71006513C9 /* Debug */ = {
@@ -301,6 +321,14 @@
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		F0A1B2C3D4E5F60718293A02 /* SwiftTradingView */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F0A1B2C3D4E5F60718293A03 /* XCRemoteSwiftPackageReference "swift-trading-view" */;
+			productName = SwiftTradingView;
+		};
+/* End XCSwiftPackageProductDependency section */
 
 /* Begin XCConfigurationList section */
 		EBBD00D62F63FF6F006513C9 /* Build configuration list for PBXProject "TradingDiary" */ = {

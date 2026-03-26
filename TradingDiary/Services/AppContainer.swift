@@ -13,6 +13,7 @@ final class AppContainer {
     lazy var fetchTradesUseCase = FetchTradesUseCase(repository: tradeRepository)
     lazy var addTradeUseCase = AddTradeUseCase(repository: tradeRepository)
     lazy var fetchMarketPricesUseCase = FetchMarketPricesUseCase(repository: marketRepository)
+    lazy var fetchMarketOHLCVUseCase = FetchMarketOHLCVUseCase(repository: marketRepository)
 
     lazy var loginUseCase = LoginUseCase(repository: authRepository)
     lazy var logoutUseCase = LogoutUseCase(repository: authRepository)
